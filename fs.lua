@@ -13,11 +13,7 @@ local override = false
 
 local function fixpath(path)
     local path = path:gsub("\\", "/")
-    local path1 = path:match("^(.+)%s+$")
-    if (path1) then
-        path = path1
-    end
-    path1 = path:match("^(.+)%.$")
+    local path1 = path:match("^(.+)[%.%s]+$")
     if (path1) then
         path = path1
     end
