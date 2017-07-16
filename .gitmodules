@@ -1,0 +1,6 @@
+[submodule "SourceSDK"]
+	path = SourceSDK
+	url = https://github.com/glua/SourceSDK.git
+[submodule "LuaInterface"]
+	path = LuaInterface
+	url = https://github.com/glua/LuaInterface.git
