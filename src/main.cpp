@@ -123,6 +123,7 @@ FileHandle_t Open_hook_internal(IBaseFileSystem *fs, const char *pFileName, cons
 		if (!opener.GetResult()) {
 			pFileName = "steam_appid.txt";
 			pathID = "BASE_PATH";
+			pOptions = "rb";
 		}
 	}
 
