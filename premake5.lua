@@ -17,7 +17,6 @@ solution "gm_fs"
 		include "SourceSDK"
 		include "SourceSDK/Tier0"
 		include "SourceSDK/Tier1"
-		include "SourceSDK/Tier2"
 		files {
 			"src/*.h",
 			"src/*.hpp",
@@ -29,6 +28,7 @@ solution "gm_fs"
 		filter "system:windows"
 			defines "_DLL_EXT=dll"
 		filter "system:linux"
-			defines "_DLL_EXT=so"
+			buildoptions "-std=gnu++11"
+			defines { "_DLL_EXT=so", "NO_MALLOC_OVERRIDE" }
 		filter "system:macosx"
-			defines "_DLL_EXT=dylib"
+			defines { "_DLL_EXT=dylib", "NO_MALLOC_OVERRIDE" }
