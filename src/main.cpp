@@ -26,7 +26,7 @@ public:
 		void **newvtable = new void *[this->vtable_size];
 
 		vtable = this->oldvtable;
-		for (int i = 0; i < this->vtable_size; i++)
+		for (size_t i = 0; i < this->vtable_size; i++)
 			newvtable[i] = vtable[i];
 
 		*(void ***)_interface = newvtable;
@@ -54,21 +54,21 @@ private:
 class OpenResult {
 public:
 	OpenResult(const char *relativetobase) {
-		this->file = relativetobase;
+		file = relativetobase;
 	}
 
 	bool GetResult() {
 		if (ThreadGetCurrentId() == OpenResult::mainthread) {
-			return this->RunLua();
+			return RunLua();
 		}
-		this->has_result = false;
 		OpenResult::m.lock();
+		this->has_result = false;
 		OpenResult::waiting_list.push_back(this);
 		OpenResult::m.unlock();
+
 		while (!this->has_result)
-		{
 			ThreadSleep(2);
-		}
+
 		return this->result;
 	}
 
@@ -91,8 +91,8 @@ public:
 	static GarrysMod::Lua::ILuaBase *lua;
 	static decltype(ThreadGetCurrentId()) mainthread;
 	const char *file;
-	bool result;
 	bool has_result;
+	bool result;
 };
 
 std::mutex OpenResult::m;
@@ -137,17 +137,15 @@ FileHandle_t Open_hook_internal(IBaseFileSystem *fs, const char *pFileName, cons
 }
 
 int ThinkHook(lua_State *state) {
-	auto v = OpenResult::waiting_list;
-	while (v.size()) {
-		OpenResult::m.lock();
-		OpenResult *res = v[0];
-		v.erase(v.begin());
-		OpenResult::m.unlock();
-		if (res->has_result)
-			continue;
+	auto &v = OpenResult::waiting_list;
+	OpenResult::m.lock();
+	for (int i = v.size() - 1; i >= 0; i--) {
+		OpenResult *res = v[i];
 		res->result = res->RunLua();
+		v.erase(v.begin() + i);
 		res->has_result = true;
 	}
+	OpenResult::m.unlock();
 	return 0;
 }
 
