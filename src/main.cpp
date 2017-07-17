@@ -6,6 +6,9 @@
 #include <vector>
 #include <mutex>
 
+IFileSystem *g_pFullFileSystem = NULL;
+static CDllDemandLoader filesystem_stdio_factory( "filesystem_stdio" );
+
 class OpenResult {
 public:
 	OpenResult(const char *relativetobase) {
@@ -44,7 +47,7 @@ public:
 	static std::mutex m;
 	static std::vector<OpenResult *> waiting_list;
 	static GarrysMod::Lua::ILuaBase *lua;
-	static decltype(ThreadGetCurrentId()) mainthread;
+	static uint32 mainthread;
 	const char *file;
 	bool result;
 	bool has_result;
@@ -52,9 +55,8 @@ public:
 
 std::mutex OpenResult::m;
 std::vector<OpenResult *> OpenResult::waiting_list;
-GarrysMod::Lua::ILuaBase *OpenResult::lua;
-decltype(ThreadGetCurrentId()) OpenResult::mainthread;
-
+GarrysMod::Lua::ILuaBase *OpenResult::lua = NULL;
+uint32 OpenResult::mainthread = 0;
 
 DEFVFUNC_(Open, FileHandle_t, (IBaseFileSystem *fs, const char *pFileName, const char *pOptions, const char *pathID));
 
@@ -91,8 +93,6 @@ int ThinkHook(lua_State *state) {
 	return 0;
 }
 
-static CDllDemandLoader filesystem_stdio_factory("filesystem_stdio");
-
 GMOD_MODULE_OPEN() {
 	OpenResult::mainthread = ThreadGetCurrentId();
 	OpenResult::lua = LUA;
@@ -120,6 +120,7 @@ GMOD_MODULE_OPEN() {
 
 	return 0;
 }
+
 GMOD_MODULE_CLOSE() {
 	if(g_pFullFileSystem != NULL) {
 		UNHOOKVFUNC((IBaseFileSystem *)g_pFullFileSystem, 2, Open);
