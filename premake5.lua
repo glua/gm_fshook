@@ -25,10 +25,3 @@ solution "gm_fs"
 			"src/*.cxx"
 		}
 		kind "SharedLib"
-		filter "system:windows"
-			defines "_DLL_EXT=dll"
-		filter "system:linux"
-			buildoptions "-std=gnu++11"
-			defines { "_DLL_EXT=so", "NO_MALLOC_OVERRIDE" }
-		filter "system:macosx"
-			defines { "_DLL_EXT=dylib", "NO_MALLOC_OVERRIDE" }
