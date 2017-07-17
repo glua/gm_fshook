@@ -1,10 +1,10 @@
+#include <vector>
+#include <mutex>
 #include "filesystem.h"
 #include "GarrysMod/Lua/Interface.h"
 #include "interface.h"
 #include "threadtools.h"
 #include "vfnhook.h"
-#include <vector>
-#include <mutex>
 
 IFileSystem *g_pFullFileSystem = NULL;
 static CDllDemandLoader filesystem_stdio_factory( "filesystem_stdio" );
