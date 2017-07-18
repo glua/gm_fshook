@@ -17,7 +17,6 @@ solution "gm_fs"
 		include "SourceSDK"
 		include "SourceSDK/Tier0"
 		include "SourceSDK/Tier1"
-		include "SourceSDK/Tier2"
 		files {
 			"src/*.h",
 			"src/*.hpp",
