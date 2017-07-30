@@ -25,18 +25,10 @@ GMOD_MODULE_OPEN() {
 		LUA->ThrowError("failed to get IFileSystem interface");
 	}
 
-
-	auto Open_real = &IBaseFileSystem::Open;
-	auto Read_real = &IBaseFileSystem::Read;
-
-	char bs[2015];
-	snprintf(bs, sizeof(bs), "%p - %p", Open_real, Read_real);
-
 	IBaseFileSystem *pBaseFileSystem = (IBaseFileSystem *)g_pFullFileSystem;
 	FunctionHooks->FileSystemReplacer = new VirtualReplacer<IBaseFileSystem>(g_pFullFileSystem);
 	void *fn = GetVirtualAddress(FunctionHooks, &VirtualFunctionHooks::IBaseFileSystem__Open);
-	
-	FunctionHooks->FileSystemReplacer->Hook(2, fn);
+	FunctionHooks->FileSystemReplacer->Hook(GetVirtualIndex(pBaseFileSystem, &IBaseFileSystem::Open), fn);
 
 	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_GLOB);
 	LUA->GetField(-1, "hook");
