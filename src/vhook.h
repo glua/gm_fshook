@@ -32,7 +32,7 @@ public:
 		// g++ always compiles with offset + 1
 		_u_addr_linux<classcall<RetType, Args...>> u;
 		u.func = ClassCaller;
-		int offset = (u.offset_plus_one - 1) / sizeof address_t;
+		int offset = (u.offset_plus_one - 1) / sizeof(address_t);
 		return (*(address_t **)instance)[offset];
 #elif defined(__APPLE__) 
 		//??
@@ -89,7 +89,7 @@ public:
 
 template <typename Class, typename RetType, typename... Args>
 static void *GetVirtualAddress(Class *instance, RetType(Class::* ClassCaller)(Args...)) {
-	return VirtualReplacer<Class>::GetVirtualAddress<RetType, Args...>(instance, ClassCaller);
+	return VirtualReplacer<Class>::GetVirtualAddress(instance, ClassCaller);
 }
 
 #endif // VHOOK_H

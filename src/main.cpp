@@ -5,7 +5,6 @@
 #include "threadtools.h"
 #include "vhook.h"
 #include "vfuncs.h"
-#include <Windows.h>
 
 IFileSystem *g_pFullFileSystem = NULL;
 static CDllDemandLoader filesystem_stdio_factory( "filesystem_stdio" );
