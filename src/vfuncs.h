@@ -9,6 +9,7 @@ public:
 	uint32 mainthread;
 	GarrysMod::Lua::ILuaBase *lua;
 	VirtualReplacer<IBaseFileSystem> *FileSystemReplacer;
+	int IBaseFileSystem__Open__index;
 
 	FileHandle_t IBaseFileSystem__Open(const char *pFileName, const char *pOptions, const char *pathID);
 

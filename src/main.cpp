@@ -28,7 +28,8 @@ GMOD_MODULE_OPEN() {
 	IBaseFileSystem *pBaseFileSystem = (IBaseFileSystem *)g_pFullFileSystem;
 	FunctionHooks->FileSystemReplacer = new VirtualReplacer<IBaseFileSystem>(g_pFullFileSystem);
 	void *fn = GetVirtualAddress(FunctionHooks, &VirtualFunctionHooks::IBaseFileSystem__Open);
-	FunctionHooks->FileSystemReplacer->Hook(GetVirtualIndex(pBaseFileSystem, &IBaseFileSystem::Open), fn);
+	FunctionHooks->IBaseFileSystem__Open__index = GetVirtualIndex(pBaseFileSystem, &IBaseFileSystem::Open);
+	FunctionHooks->FileSystemReplacer->Hook(FunctionHooks->IBaseFileSystem__Open__index, fn);
 
 	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_GLOB);
 	LUA->GetField(-1, "hook");

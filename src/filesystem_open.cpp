@@ -65,7 +65,7 @@ FileHandle_t VirtualFunctionHooks::IBaseFileSystem__Open(const char *pFileName, 
 		}
 	}
 
-	return FunctionHooks->FileSystemReplacer->Call<FileHandle_t, const char *, const char *, const char *>(2, pFileName, pOptions, pathID);
+	return FunctionHooks->FileSystemReplacer->Call<FileHandle_t, const char *, const char *, const char *>(FunctionHooks->IBaseFileSystem__Open__index, pFileName, pOptions, pathID);
 }
 
 
