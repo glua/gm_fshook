@@ -2,8 +2,8 @@
 #define VHOOK_H
 #include <cstdint>
 
-#if !defined(__linux) && !defined(__APPLE__) && !defined(_WIN32)
-#error "this is not supported on non apple/linux/win32"
+#if !defined(__linux) && !defined(_WIN32)
+#error "this is not supported on non linux/win32"
 #endif
 
 
@@ -51,8 +51,6 @@ public:
 		u.func = ClassCaller;
 		int offset = (u.offset_plus_one - 1) / sizeof(address_t);
 		return (*(address_t **)instance)[offset];
-#elif defined(__APPLE__) 
-		//??
 #endif
 	}
 
