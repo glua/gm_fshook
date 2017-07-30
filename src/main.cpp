@@ -4,8 +4,8 @@
 #include "interface.h"
 #include "threadtools.h"
 #include "vhook.h"
-#include "vindex.h"
 #include "vfuncs.h"
+#include <Windows.h>
 
 IFileSystem *g_pFullFileSystem = NULL;
 static CDllDemandLoader filesystem_stdio_factory( "filesystem_stdio" );
@@ -26,10 +26,18 @@ GMOD_MODULE_OPEN() {
 		LUA->ThrowError("failed to get IFileSystem interface");
 	}
 
+
+	auto Open_real = &IBaseFileSystem::Open;
+	auto Read_real = &IBaseFileSystem::Read;
+
+	char bs[2015];
+	snprintf(bs, sizeof(bs), "%p - %p", Open_real, Read_real);
+
 	IBaseFileSystem *pBaseFileSystem = (IBaseFileSystem *)g_pFullFileSystem;
 	FunctionHooks->FileSystemReplacer = new VirtualReplacer<IBaseFileSystem>(g_pFullFileSystem);
+	void *fn = GetVirtualAddress(FunctionHooks, &VirtualFunctionHooks::IBaseFileSystem__Open);
 	
-	FunctionHooks->FileSystemReplacer->Hook(2, &VirtualFunctionHooks::IBaseFileSystem__Open);
+	FunctionHooks->FileSystemReplacer->Hook(2, fn);
 
 	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_GLOB);
 	LUA->GetField(-1, "hook");

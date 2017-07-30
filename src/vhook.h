@@ -5,6 +5,7 @@
 #error "this is not supported on non apple/linux/win32"
 #endif
 
+
 template <typename Class>
 class VirtualReplacer {
 public:
@@ -13,6 +14,30 @@ public:
 		void *addr;
 		t func;
 	};
+	template <typename t>
+	union _u_addr_linux {
+		t func;
+		int offset_plus_one;
+	};
+
+	using address_t = void *;
+	template <typename RetType, typename... Args>
+	using classcall = RetType (Class::*)(Args...);
+
+	template<typename RetType, typename... Args>
+	static address_t GetVirtualAddress(Class *instance, classcall<RetType, Args...> ClassCaller) {
+#ifdef _WIN32
+		return *(address_t *)&ClassCaller;
+#elif defined(__linux)
+		// g++ always compiles with offset + 1
+		_u_addr_linux<classcall<RetType, Args...>> u;
+		u.func = ClassCaller;
+		int offset = (u.offset_plus_one - 1) / sizeof address_t;
+		return (*(address_t **)instance)[offset];
+#elif defined(__APPLE__) 
+		//??
+#endif
+	}
 
 	VirtualReplacer(Class *instance, bool deinit = false) {
 		this->deinit = deinit;
@@ -20,49 +45,51 @@ public:
 
 		int size = 0;
 
-		old_vtable = *(void ***)instance;
+		old_vtable = *(address_t **)instance;
 
-		void **vtable_end = old_vtable;
+		address_t *vtable_end = old_vtable;
 
 		while (vtable_end[size++]);
 		size--;
 
-		new_vtable = new void *[size];
+		new_vtable = new address_t[size];
 
 		for (int i = 0; i < size; i++)
 			new_vtable[i] = old_vtable[i];
 
-		*(void ***)instance = new_vtable;
+		*(address_t **)instance = new_vtable;
 	}
 	~VirtualReplacer() {
 		if (deinit) {
-			*(void ***)instance = old_vtable;
+			*(address_t **)instance = old_vtable;
 		}
 		delete new_vtable;
 	}
-	template <typename t>
-	void *Hook(int index, t func) {
-		_u_addr<t> u;
-		u.func = func;
-		new_vtable[index] = u.addr;
+	void *Hook(int index, address_t func) {
+		new_vtable[index] = func;
 		return old_vtable[index];
 	}
 	template <typename RetType, typename... Args> 
 	RetType Call(void *&func, Args... args) {
-		auto typedfunc = (RetType (Class::* *)(Args... args))&func;
-		return instance->**typedfunc(args...);
+		auto typedfunc = (RetType (Class::* *)(Args...))&func;
+		return (instance->**typedfunc)(args...);
 	}
 	template <typename RetType, typename... Args>
 	RetType Call(int funcindex, Args... args) {
-		auto typedfunc = (RetType (Class::* *)(Args...))&old_vtable[funcindex];
-		return (instance->**typedfunc)(args...);
+		return Call<RetType, Args...>(old_vtable[funcindex], args...);
 	}
 
 public:
 	bool deinit;
-	void **old_vtable;
+	address_t *old_vtable;
 	Class *instance;
-	void **new_vtable;
+	address_t *new_vtable;
 };
+
+
+template <typename Class, typename RetType, typename... Args>
+static void *GetVirtualAddress(Class *instance, RetType(Class::* ClassCaller)(Args...)) {
+	return VirtualReplacer<Class>::GetVirtualAddress<RetType, Args...>(instance, ClassCaller);
+}
 
 #endif // VHOOK_H
