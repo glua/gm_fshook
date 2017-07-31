@@ -18,6 +18,7 @@ public:
 	template <typename t>
 	union _u_addr_linux {
 		t func;
+		void *addr;
 		int offset_plus_one;
 	};
 
@@ -25,16 +26,12 @@ public:
 	template <typename RetType, typename... Args>
 	using classcall = RetType (Class::*)(Args...);
 
-
-
 	static int VirtualTableSize(Class *instance) {
 		int size = 0;
 		address_t *vtable = *(address_t **)instance;
 		while (vtable[size++]);
 		return size - 1;
 	}
-
-
 
 	// can be used with interfaces and implementations
 	template<typename RetType, typename... Args>
