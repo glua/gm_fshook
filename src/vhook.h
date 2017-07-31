@@ -25,6 +25,17 @@ public:
 	template <typename RetType, typename... Args>
 	using classcall = RetType (Class::*)(Args...);
 
+
+
+	static int VirtualTableSize(Class *instance) {
+		int size = 0;
+		address_t *vtable = *(address_t **)instance;
+		while (vtable[size++]);
+		return size - 1;
+	}
+
+
+
 	// can be used with interfaces and implementations
 	template<typename RetType, typename... Args>
 	static address_t GetVirtualAddress(Class *instance, classcall<RetType, Args...> ClassCaller) {
@@ -46,10 +57,14 @@ public:
 		}
 		return *(address_t *)&ClassCaller;
 #elif defined(__linux)
-		// g++ always compiles with offset + 1
+		// TODO: find better way to find which impl it is using
 		_u_addr_linux<classcall<RetType, Args...>> u;
 		u.func = ClassCaller;
 		int offset = (u.offset_plus_one - 1) / sizeof(address_t);
+
+		if (offset > VirtualTableSize(instance))
+			return (address_t)u.addr;
+
 		return (*(address_t **)instance)[offset];
 #endif
 	}
@@ -71,14 +86,9 @@ public:
 		this->deinit = deinit;
 		this->instance = instance;
 
-		int size = 0;
+		int size = VirtualTableSize(instance);
 
 		old_vtable = *(address_t **)instance;
-
-		address_t *vtable_end = old_vtable;
-
-		while (vtable_end[size++]);
-		size--;
 
 		new_vtable = new address_t[size];
 
