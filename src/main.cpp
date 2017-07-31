@@ -6,6 +6,7 @@
 #include "vhook.h"
 #include "vfuncs.h"
 
+
 IFileSystem *g_pFullFileSystem = NULL;
 static CDllDemandLoader filesystem_stdio_factory( "filesystem_stdio" );
 VirtualFunctionHooks *FunctionHooks = nullptr;
@@ -26,11 +27,23 @@ GMOD_MODULE_OPEN() {
 	}
 
 	IBaseFileSystem *pBaseFileSystem = (IBaseFileSystem *)g_pFullFileSystem;
-	FunctionHooks->FileSystemReplacer = new VirtualReplacer<IBaseFileSystem>(g_pFullFileSystem);
+	FunctionHooks->BaseFileSystemReplacer = new VirtualReplacer<IBaseFileSystem>(g_pFullFileSystem);
 	void *fn = GetVirtualAddress(FunctionHooks, &VirtualFunctionHooks::IBaseFileSystem__Open);
 	FunctionHooks->IBaseFileSystem__Open__index = GetVirtualIndex(pBaseFileSystem, &IBaseFileSystem::Open);
-	FunctionHooks->FileSystemReplacer->Hook(FunctionHooks->IBaseFileSystem__Open__index, fn);
+	FunctionHooks->BaseFileSystemReplacer->Hook(FunctionHooks->IBaseFileSystem__Open__index, fn);
 
+
+	FunctionHooks->FileSystemReplacer = new VirtualReplacer<IFileSystem>(g_pFullFileSystem);
+	FunctionHooks->IFileSystem__FindFirstEx__index = GetVirtualIndex(g_pFullFileSystem, &IFileSystem::FindFirstEx);
+	FunctionHooks->IFileSystem__FindNext__index = GetVirtualIndex(g_pFullFileSystem, &IFileSystem::FindNext);
+	FunctionHooks->IFileSystem__FindClose__index = GetVirtualIndex(g_pFullFileSystem, &IFileSystem::FindClose);
+	FunctionHooks->IFileSystem__FindIsDirectory__index = GetVirtualIndex(g_pFullFileSystem, &IFileSystem::FindIsDirectory);
+
+	FunctionHooks->FileSystemReplacer->Hook(FunctionHooks->IFileSystem__FindFirstEx__index, GetVirtualAddress(FunctionHooks, &VirtualFunctionHooks::IFileSystem__FindFirstEx));
+	FunctionHooks->FileSystemReplacer->Hook(FunctionHooks->IFileSystem__FindNext__index, GetVirtualAddress(FunctionHooks, &VirtualFunctionHooks::IFileSystem__FindNext));
+	FunctionHooks->FileSystemReplacer->Hook(FunctionHooks->IFileSystem__FindClose__index, GetVirtualAddress(FunctionHooks, &VirtualFunctionHooks::IFileSystem__FindClose));
+	FunctionHooks->FileSystemReplacer->Hook(FunctionHooks->IFileSystem__FindIsDirectory__index, GetVirtualAddress(FunctionHooks, &VirtualFunctionHooks::IFileSystem__FindIsDirectory));
+	
 	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_GLOB);
 	LUA->GetField(-1, "hook");
 	LUA->GetField(-1, "Add");
@@ -45,7 +58,7 @@ GMOD_MODULE_OPEN() {
 
 GMOD_MODULE_CLOSE() {
 
-	delete FunctionHooks->FileSystemReplacer;
+	delete FunctionHooks->BaseFileSystemReplacer;
 	delete FunctionHooks;
 
 	return 0;

@@ -21,7 +21,7 @@ local function fixpath(path)
     return path
 end
 
-hook.Add("ShouldOpenFile", "", function(path)
+hook.Add("ShouldHideFile", "", function(path)
     if (override) then
         return false
     end

@@ -97,9 +97,16 @@ public:
 		new_vtable[index] = func;
 		return old_vtable[index];
 	}
+	struct _str_class_ptr {
+		void *funcptr;
+		int offset;
+	};
 	template <typename RetType, typename... Args> 
-	RetType Call(void *&func, Args... args) {
-		auto typedfunc = (RetType (Class::* *)(Args...))&func;
+	RetType Call(void *func, Args... args) {
+		_str_class_ptr s;
+		s.funcptr = func;
+		s.offset = 0;
+		auto typedfunc = (RetType (Class::* *)(Args...))&s;
 		return (instance->**typedfunc)(args...);
 	}
 	template <typename RetType, typename... Args>
