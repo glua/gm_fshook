@@ -23,20 +23,22 @@ public:
 
 	IOpenResult GetResult() {
 		if (ThreadGetCurrentId() == FunctionHooks->mainthread) {
-			return RunLua();
+			RunLua();
 		}
-		OpenResult::m.lock();
-		this->has_result = false;
-		OpenResult::waiting_list.push_back(this);
-		OpenResult::m.unlock();
+		else {
+			OpenResult::m.lock();
+			this->has_result = false;
+			OpenResult::waiting_list.push_back(this);
+			OpenResult::m.unlock();
 
-		while (!this->has_result)
-			ThreadSleep(2);
+			while (!this->has_result)
+				ThreadSleep(2);
+		}
 
 		return this->result;
 	}
 
-	IOpenResult RunLua() {
+	void RunLua() {
 		auto lua = FunctionHooks->lua;
 		lua->PushSpecial(GarrysMod::Lua::SPECIAL_GLOB);
 		lua->GetField(-1, "hook");
@@ -45,31 +47,28 @@ public:
 		lua->PushString(file);
 		lua->Call(2, 2);
 
-		IOpenResult ret;
-
 		if (lua->IsType(-2,GarrysMod::Lua::Type::BOOL)) {
-			ret.shouldOpen = !lua->GetBool(-1);
-			ret.shouldRedirect = false;
+			this->result.shouldOpen = !lua->GetBool(-2);
+			this->result.shouldRedirect = false;
 		}
 		else if (lua->IsType(-2,GarrysMod::Lua::Type::STRING)) {
-			ret.shouldOpen = true;
-			ret.shouldRedirect = true;
-			ret.redirect = lua->GetString(-1);
+			this->result.shouldOpen = true;
+			this->result.shouldRedirect = true;
+			this->result.redirect = std::string(lua->GetString(-2));
+
 			if (lua->IsType(-1, GarrysMod::Lua::Type::STRING)) {
-				ret.redirectPathID = lua->GetString(-2);
+				this->result.redirectPathID = std::string(lua->GetString(-1));
 			}
 			else {
-				ret.redirectPathID = "GAME";
+				this->result.redirectPathID = "GAME";
 			}
 		}
 		else {
-			ret.shouldOpen = true;
-			ret.shouldRedirect = false;
+			this->result.shouldOpen = true;
+			this->result.shouldRedirect = false;
 		}
 
 		lua->Pop(4);
-
-		return ret;
 	}
 
 public:

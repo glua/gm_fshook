@@ -38,7 +38,7 @@ int ThinkHook(lua_State *state) {
 	OpenResult::m.lock();
 	for (int i = v.size() - 1; i >= 0; i--) {
 		OpenResult *res = v[i];
-		res->result = res->RunLua();
+		res->RunLua();
 		v.erase(v.begin() + i);
 		res->has_result = true;
 	}
