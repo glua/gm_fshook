@@ -60,7 +60,7 @@ public:
 				this->result.redirectPathID = std::string(lua->GetString(-1));
 			}
 			else {
-				this->result.redirectPathID = "GAME";
+				this->result.redirectPathID = "BASE_PATH";
 			}
 		}
 		else {
