@@ -25,7 +25,7 @@ FileHandle_t VirtualFunctionHooks::IBaseFileSystem__Open(const char *pFileName, 
 	}
 
 	if (res.shouldRedirect) {
-		return FunctionHooks->BaseFileSystemReplacer->Call<FileHandle_t, const char *, const char *, const char *>(FunctionHooks->IBaseFileSystem__Open__index, res.redirect.c_str(), pOptions, pathID);
+		return FunctionHooks->BaseFileSystemReplacer->Call<FileHandle_t, const char *, const char *, const char *>(FunctionHooks->IBaseFileSystem__Open__index, res.redirect.c_str(), pOptions, res.redirectPathID.c_str());
 	}
 	else {
 		return FunctionHooks->BaseFileSystemReplacer->Call<FileHandle_t, const char *, const char *, const char *>(FunctionHooks->IBaseFileSystem__Open__index, pFileName, pOptions, pathID);

@@ -12,6 +12,7 @@ struct IOpenResult {
 	bool shouldOpen;
 	bool shouldRedirect;
 	std::string redirect;
+	std::string redirectPathID;
 };
 
 class OpenResult {
@@ -42,18 +43,24 @@ public:
 		lua->GetField(-1, "Run");
 		lua->PushString("ShouldHideFile");
 		lua->PushString(file);
-		lua->Call(2, 1);
+		lua->Call(2, 2);
 
 		IOpenResult ret;
 
-		if (lua->IsType(-1,GarrysMod::Lua::Type::BOOL)) {
+		if (lua->IsType(-2,GarrysMod::Lua::Type::BOOL)) {
 			ret.shouldOpen = !lua->GetBool(-1);
 			ret.shouldRedirect = false;
 		}
-		else if (lua->IsType(-1,GarrysMod::Lua::Type::STRING)) {
+		else if (lua->IsType(-2,GarrysMod::Lua::Type::STRING)) {
 			ret.shouldOpen = true;
 			ret.shouldRedirect = true;
 			ret.redirect = lua->GetString(-1);
+			if (lua->IsType(-1, GarrysMod::Lua::Type::STRING)) {
+				ret.redirectPathID = lua->GetString(-2);
+			}
+			else {
+				ret.redirectPathID = "GAME";
+			}
 		}
 		else {
 			ret.shouldOpen = true;
