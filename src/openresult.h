@@ -47,7 +47,7 @@ public:
 		IOpenResult ret;
 
 		if (lua->IsType(-1,GarrysMod::Lua::Type::BOOL)) {
-			ret.shouldOpen = lua->GetBool(-1);
+			ret.shouldOpen = !lua->GetBool(-1);
 			ret.shouldRedirect = false;
 		}
 		else if (lua->IsType(-1,GarrysMod::Lua::Type::STRING)) {
