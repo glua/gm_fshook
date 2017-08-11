@@ -67,7 +67,7 @@ public:
 			ret.shouldRedirect = false;
 		}
 
-		lua->Pop(3);
+		lua->Pop(4);
 
 		return ret;
 	}
