@@ -55,6 +55,11 @@ public:
 			ret.shouldRedirect = true;
 			ret.redirect = lua->GetString(-1);
 		}
+		else {
+			ret.shouldOpen = true;
+			ret.shouldRedirect = false;
+		}
+
 		lua->Pop(3);
 
 		return ret;
