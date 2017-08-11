@@ -6,7 +6,7 @@
 
 static bool IsOK(const char *name) {
 	OpenResult opener(name);
-	return opener.GetResult();
+	return opener.GetResult().shouldOpen;
 }
 
 static const char *NextFile(FileFindHandle_t pHandle) {
