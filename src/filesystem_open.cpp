@@ -14,14 +14,22 @@ FileHandle_t VirtualFunctionHooks::IBaseFileSystem__Open(const char *pFileName, 
 	g_pFullFileSystem->RelativePathToFullPath(pFileName, pathID, temp, sizeof(temp) - 1);
 	char relative_path[4096];
 	relative_path[4095] = 0;
+	IOpenResult res;
+
 	if (g_pFullFileSystem->FullPathToRelativePathEx(temp, "BASE_PATH", relative_path, sizeof relative_path - 1)) {
 		OpenResult opener(relative_path);
-		if (!opener.GetResult()) {
+		res = opener.GetResult();
+		if (!res.shouldOpen) {
 			return 0;
 		}
 	}
 
-	return FunctionHooks->BaseFileSystemReplacer->Call<FileHandle_t, const char *, const char *, const char *>(FunctionHooks->IBaseFileSystem__Open__index, pFileName, pOptions, pathID);
+	if (res.shouldRedirect) {
+		return FunctionHooks->BaseFileSystemReplacer->Call<FileHandle_t, const char *, const char *, const char *>(FunctionHooks->IBaseFileSystem__Open__index, res.redirect.c_str(), pOptions, res.redirectPathID.c_str());
+	}
+	else {
+		return FunctionHooks->BaseFileSystemReplacer->Call<FileHandle_t, const char *, const char *, const char *>(FunctionHooks->IBaseFileSystem__Open__index, pFileName, pOptions, pathID);
+	}
 }
 
 
@@ -30,7 +38,7 @@ int ThinkHook(lua_State *state) {
 	OpenResult::m.lock();
 	for (int i = v.size() - 1; i >= 0; i--) {
 		OpenResult *res = v[i];
-		res->result = res->RunLua();
+		res->RunLua();
 		v.erase(v.begin() + i);
 		res->has_result = true;
 	}
