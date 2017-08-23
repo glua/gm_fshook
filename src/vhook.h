@@ -38,6 +38,9 @@ public:
 	static address_t GetVirtualAddress(Class *instance, classcall<RetType, Args...> ClassCaller) {
 #ifdef _WIN32
 		unsigned char *addr = *(unsigned char **)&ClassCaller;
+		// check for rel jmp opcode (debug mode adds this layer of indirection)
+		if (addr[0] == 0xE9)
+			addr += 5 + *(std::int32_t *)&addr[1];
 		// check for jmp functions
 		if (addr[0] == 0x8B)
 			addr += 2;
