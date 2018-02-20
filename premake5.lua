@@ -17,6 +17,9 @@ solution "gm_fs"
 		include "SourceSDK"
 		include "SourceSDK/Tier0"
 		include "SourceSDK/Tier1"
+		if (os.target() == "windows") then
+			links "Shlwapi" -- PathCanonicalize
+		end
 		files {
 			"src/*.h",
 			"src/*.hpp",
