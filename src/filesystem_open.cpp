@@ -45,12 +45,11 @@ FileHandle_t VirtualFunctionHooks::IBaseFileSystem__Open(const char *pFileName, 
 
 	char relative_path[4096];
 	relative_path[4095] = 0;
-	if (!g_pFullFileSystem->FullPathToRelativePathEx(full_path_str.c_str(), "BASE_PATH", relative_path, sizeof relative_path - 1))
-		return 0;
-	
-	OpenResult opener(relative_path);
-	if (!opener.GetResult()) {
-		return 0;
+	if (g_pFullFileSystem->FullPathToRelativePathEx(full_path_str.c_str(), "BASE_PATH", relative_path, sizeof relative_path - 1)) {
+		OpenResult opener(relative_path);
+		if (!opener.GetResult()) {
+			return 0;
+		}
 	}
 
 	return FunctionHooks->BaseFileSystemReplacer->Call<FileHandle_t, const char *, const char *, const char *>(FunctionHooks->IBaseFileSystem__Open__index, pFileName, pOptions, pathID);
