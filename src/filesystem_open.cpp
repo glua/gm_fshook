@@ -40,7 +40,7 @@ FileHandle_t VirtualFunctionHooks::IBaseFileSystem__Open(const char *pFileName, 
 
 	std::string full_path_str = full_path;
 
-	if (Canonicalize(full_path_str))
+	if (!Canonicalize(full_path_str))
 		return 0; // fuck off
 
 	char relative_path[4096];
