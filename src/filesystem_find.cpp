@@ -3,9 +3,13 @@
 #include "vhook.h"
 #include <map>
 #include <tuple>
+#include "fs_funcs.h"
 
-static bool IsOK(const char *name) {
-	OpenResult opener(name);
+static bool IsOK(const char *full) {
+	std::string relative_str;
+	if (!RelativeFrom(full, "BASE_PATH", relative_str))
+		return false;
+	OpenResult opener(relative_str, full);
 	return opener.GetResult();
 }
 
@@ -17,10 +21,8 @@ auto handle_to_stuff = std::map<FileFindHandle_t, std::tuple<const char *, const
 
 static const char *NextOK(const char *name, FileFindHandle_t Handle) {
 	char pathname[4096];
-	char temp[4096];
-	temp[4095] = 0;
-	char relative_path[4096];
-	relative_path[4095] = 0;
+	char full_path_str[4096];
+	full_path_str[4095] = 0;
 	const char *pPathID, *pWildCard;
 	std::tie(pPathID, pWildCard) = handle_to_stuff[Handle];
 
@@ -37,8 +39,8 @@ static const char *NextOK(const char *name, FileFindHandle_t Handle) {
 		int offset = enddir - pathname;
 		snprintf(enddir, sizeof(pathname) - offset, "%s", name);
 
-		g_pFullFileSystem->RelativePathToFullPath(pathname, pPathID, temp, sizeof temp - 1);
-		if (g_pFullFileSystem->FullPathToRelativePathEx(temp, "BASE_PATH", relative_path, sizeof relative_path - 1) && IsOK(relative_path))
+		g_pFullFileSystem->RelativePathToFullPath(pathname, pPathID, full_path_str, sizeof full_path_str - 1);
+		if (IsOK(full_path_str))
 			break;
 		name = NextFile(Handle);
 	}

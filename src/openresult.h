@@ -9,8 +9,9 @@
 
 class OpenResult {
 public:
-	OpenResult(const char *relativetobase) {
-		file = relativetobase;
+	OpenResult(std::string relativetobase, std::string full_path) {
+		relative = relativetobase;
+		full = full_path;
 	}
 
 	bool GetResult() {
@@ -34,8 +35,9 @@ public:
 		lua->GetField(-1, "hook");
 		lua->GetField(-1, "Run");
 		lua->PushString("ShouldHideFile");
-		lua->PushString(file);
-		lua->Call(2, 1);
+		lua->PushString(relative.substr(2).c_str());
+		lua->PushString(full.c_str());
+		lua->Call(3, 1);
 		bool ret = !lua->GetBool(-1);
 		lua->Pop(3);
 		return ret;
@@ -44,7 +46,7 @@ public:
 public:
 	static std::mutex m;
 	static std::vector<OpenResult *> waiting_list;
-	const char *file;
+	std::string relative, full;
 	bool has_result;
 	bool result;
 };
