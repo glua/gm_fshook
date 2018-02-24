@@ -5,7 +5,7 @@
 #include <tuple>
 #include "fs_funcs.h"
 
-static bool IsOK(const char *full) {
+static bool IsOK(std::string full) {
 	std::string relative_str;
 	if (!RelativeFrom(full, "BASE_PATH", relative_str))
 		return false;
@@ -21,8 +21,7 @@ auto handle_to_stuff = std::map<FileFindHandle_t, std::tuple<const char *, const
 
 static const char *NextOK(const char *name, FileFindHandle_t Handle) {
 	char pathname[4096];
-	char full_path_str[4096];
-	full_path_str[4095] = 0;
+	std::string full_path;
 	const char *pPathID, *pWildCard;
 	std::tie(pPathID, pWildCard) = handle_to_stuff[Handle];
 
@@ -39,8 +38,10 @@ static const char *NextOK(const char *name, FileFindHandle_t Handle) {
 		int offset = enddir - pathname;
 		snprintf(enddir, sizeof(pathname) - offset, "%s", name);
 
-		g_pFullFileSystem->RelativePathToFullPath(pathname, pPathID, full_path_str, sizeof full_path_str - 1);
-		if (IsOK(full_path_str))
+		if (!ToFull(pathname, pPathID, full_path))
+			return 0;
+
+		if (IsOK(full_path))
 			break;
 		name = NextFile(Handle);
 	}

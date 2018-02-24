@@ -12,13 +12,10 @@ void *Open_original;
 
 FileHandle_t VirtualFunctionHooks::IBaseFileSystem__Open(const char *pFileName, const char *pOptions, const char *pathID) {
 	IBaseFileSystem *ths = (IBaseFileSystem *)this;
-	char full_path_c[4096];
-	full_path_c[4095] = 0;
+	std::string relative_path, full_path;
 	
-	if (!g_pFullFileSystem->RelativePathToFullPath(pFileName, pathID, full_path_c, sizeof full_path_c - 1))
+	if (!ToFull(pFileName, pathID, full_path))
 		return 0;
-
-	std::string relative_path, full_path = full_path_c;
 
 	if (!RelativeFrom(full_path, "BASE_PATH", relative_path))
 		return 0;

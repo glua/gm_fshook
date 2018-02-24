@@ -3,6 +3,7 @@
 
 static bool Canonicalize(std::string &path);
 static bool ToRelative(std::string from, std::string to, std::string &out);
+static bool ToFull(std::string relative, const char *pathID, std::string &out);
 
 #ifdef _WIN32 
 #include <Windows.h>
@@ -29,7 +30,23 @@ bool ToRelative(std::string from, std::string to, std::string &out) {
 		out = outc;
 		std::replace(out.begin(), out.end(), '\\', '/');
 	}
+	out = out.substr(2);
 	return ret != FALSE;
+}
+
+bool ToFull(std::string relative, const char *pathID, std::string &out) {
+	char full_path_c[4096];
+	full_path_c[4095];
+	if (!g_pFullFileSystem->RelativePathToFullPath("./", pathID, full_path_c, sizeof full_path_c - 1))
+		return 0;
+	char outc[MAX_PATH];
+	LPSTR ret = PathCombineA(outc, full_path_c, relative.c_str());
+	outc[MAX_PATH - 1] = 0;
+	if (ret != NULL) {
+		out = outc;
+		return true;
+	}
+	return false;
 }
 #endif
 

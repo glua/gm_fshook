@@ -35,7 +35,7 @@ public:
 		lua->GetField(-1, "hook");
 		lua->GetField(-1, "Run");
 		lua->PushString("ShouldHideFile");
-		lua->PushString(relative.substr(2).c_str());
+		lua->PushString(relative.c_str());
 		lua->PushString(full.c_str());
 		lua->Call(3, 1);
 		bool ret = !lua->GetBool(-1);
