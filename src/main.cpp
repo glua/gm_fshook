@@ -42,16 +42,6 @@ GMOD_MODULE_OPEN() {
 	FunctionHooks->FileSystemReplacer->Hook(FunctionHooks->IFileSystem__FindFirstEx__index, GetVirtualAddress(FunctionHooks, &VirtualFunctionHooks::IFileSystem__FindFirstEx));
 	FunctionHooks->FileSystemReplacer->Hook(FunctionHooks->IFileSystem__FindNext__index, GetVirtualAddress(FunctionHooks, &VirtualFunctionHooks::IFileSystem__FindNext));
 	FunctionHooks->FileSystemReplacer->Hook(FunctionHooks->IFileSystem__FindClose__index, GetVirtualAddress(FunctionHooks, &VirtualFunctionHooks::IFileSystem__FindClose));
-	FunctionHooks->FileSystemReplacer->Hook(FunctionHooks->IFileSystem__FindIsDirectory__index, GetVirtualAddress(FunctionHooks, &VirtualFunctionHooks::IFileSystem__FindIsDirectory));
-	
-	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_GLOB);
-	LUA->GetField(-1, "hook");
-	LUA->GetField(-1, "Add");
-	LUA->PushString("Think");
-	LUA->PushString("gm_fs");
-	LUA->PushCFunction(ThinkHook);
-	LUA->Call(3, 0);
-	LUA->Pop(1);
 
 	return 0;
 }

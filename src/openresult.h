@@ -15,18 +15,7 @@ public:
 	}
 
 	bool GetResult() {
-		if (ThreadGetCurrentId() == FunctionHooks->mainthread) {
-			return RunLua();
-		}
-		OpenResult::m.lock();
-		this->has_result = false;
-		OpenResult::waiting_list.push_back(this);
-		OpenResult::m.unlock();
-
-		while (!this->has_result)
-			ThreadSleep(2);
-
-		return this->result;
+		return RunLua();
 	}
 
 	bool RunLua() {
@@ -44,10 +33,6 @@ public:
 	}
 
 public:
-	static std::mutex m;
-	static std::vector<OpenResult *> waiting_list;
 	std::string relative, full;
-	bool has_result;
-	bool result;
 };
 #endif // OPENRESULT_H

@@ -22,10 +22,8 @@ public:
 	const char *IFileSystem__FindFirstEx(const char *pWildCard, const char *pPathID, FileFindHandle_t *pHandle);
 	const char *IFileSystem__FindNext(FileFindHandle_t pHandle);
 	void IFileSystem__FindClose(FileFindHandle_t Handle);
-	bool IFileSystem__FindIsDirectory(FileFindHandle_t pHandle);
 };
 
 extern VirtualFunctionHooks *FunctionHooks;
-int ThinkHook(lua_State *state);
 
 #endif // VFUNCS_H
