@@ -10,7 +10,7 @@ FileHandle_t VirtualFunctionHooks::IBaseFileSystem__Open(const char *pFileName, 
 	IBaseFileSystem *ths = (IBaseFileSystem *)this;
 	std::string relative_path, full_path;
 	
-	if (!pathID || strcmp("SKIN", pathID))
+	if (pathID && strcmp("SKIN", pathID))
 		if (FunctionHooks->mainthread == ThreadGetCurrentId()) {
 
 			try {
