@@ -9,9 +9,10 @@
 
 class OpenResult {
 public:
-	OpenResult(std::string relativetobase, std::string full_path) {
+	OpenResult(std::string relativetobase, std::string full_path, std::string pathid = "") {
 		relative = relativetobase;
 		full = full_path;
+		path = pathid;
 	}
 
 	bool GetResult() {
@@ -26,13 +27,14 @@ public:
 		lua->PushString("ShouldHideFile");
 		lua->PushString(relative.c_str());
 		lua->PushString(full.c_str());
-		lua->Call(3, 1);
+		lua->PushString(path.c_str());
+		lua->Call(4, 1);
 		bool ret = !lua->GetBool(-1);
 		lua->Pop(3);
 		return ret;
 	}
 
 public:
-	std::string relative, full;
+	std::string relative, full, path;
 };
 #endif // OPENRESULT_H

@@ -7,9 +7,29 @@
 #include "vfuncs.h"
 
 
-IFileSystem *g_pFullFileSystem = NULL;
+IFileSystem *g_pFullFileSystem = nullptr;
 static CDllDemandLoader filesystem_stdio_factory( "filesystem_stdio" );
 VirtualFunctionHooks *FunctionHooks = nullptr;
+
+static std::vector<std::string> logs;
+
+void FSLog(std::string msg) {
+	logs.push_back(msg);
+}
+
+static int FSLogNotify(lua_State *state) {
+	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_GLOB);
+	LUA->GetField(-1, "hook");
+	LUA->GetField(-1, "Run");
+	for (std::string &msg : logs) {
+		LUA->Push(-1);
+		LUA->PushString("FSLogNotify");
+		LUA->PushString(msg.c_str());
+		LUA->Call(2, 0);
+	}
+	LUA->Pop(3);
+	return 0;
+}
 
 GMOD_MODULE_OPEN() {
 	FunctionHooks = new VirtualFunctionHooks;
@@ -42,6 +62,15 @@ GMOD_MODULE_OPEN() {
 	FunctionHooks->FileSystemReplacer->Hook(FunctionHooks->IFileSystem__FindFirstEx__index, GetVirtualAddress(FunctionHooks, &VirtualFunctionHooks::IFileSystem__FindFirstEx));
 	FunctionHooks->FileSystemReplacer->Hook(FunctionHooks->IFileSystem__FindNext__index, GetVirtualAddress(FunctionHooks, &VirtualFunctionHooks::IFileSystem__FindNext));
 	FunctionHooks->FileSystemReplacer->Hook(FunctionHooks->IFileSystem__FindClose__index, GetVirtualAddress(FunctionHooks, &VirtualFunctionHooks::IFileSystem__FindClose));
+
+	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_GLOB);
+	LUA->GetField(-1, "hook");
+	LUA->GetField(-1, "Add");
+	LUA->PushString("Think");
+	LUA->PushString("gm_fs");
+	LUA->PushCFunction(FSLogNotify);
+	LUA->Call(3, 0);
+	LUA->Pop(2);
 
 	return 0;
 }

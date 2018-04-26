@@ -5,10 +5,16 @@
 #include <tuple>
 #include "fs_funcs.h"
 
-static bool IsOK(std::string full) {
+static bool IsOK(std::string full, std::string pathid) {
 	std::string relative_str;
-	if (!RelativeFrom(full, "BASE_PATH", relative_str))
-		return false;
+	try {
+		RelativeFrom(full, "BASE_PATH", relative_str);
+	}
+	catch (std::exception e) {
+		OpenResult opener("", full, pathid);
+		return opener.GetResult();
+		return true;
+	}
 	OpenResult opener(relative_str, full);
 	return opener.GetResult();
 }
@@ -39,10 +45,14 @@ static const char *NextOK(const char *name, FileFindHandle_t Handle) {
 		int offset = enddir - pathname;
 		snprintf(enddir, sizeof(pathname) - offset, "%s", name);
 
-		if (!ToFull(pathname, pPathID, full_path))
+		try {
+			ToFull(pathname, pPathID, full_path);
+		} 
+		catch (std::exception e) {
 			return 0;
+		}
 
-		if (IsOK(full_path))
+		if (IsOK(full_path, pPathID ? pPathID : "NULL"))
 			break;
 		name = NextFile(Handle);
 	}
